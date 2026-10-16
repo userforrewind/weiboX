@@ -20,7 +20,10 @@ jobs:
           java-version: '17'
           cache: gradle
       - name: Install Android SDK 34
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1); fi
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-34" "build-tools;34.0.0" || test "${PIPESTATUS[1]}" -eq 0
       - name: Build debug APK
         run: bash ./gradlew :app:assembleDebug --stacktrace --no-daemon
       - name: Upload APK
